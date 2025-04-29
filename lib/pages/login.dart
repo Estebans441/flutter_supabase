@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 
-class Login extends StatelessWidget {
+class Login extends StatefulWidget {
   const Login({super.key});
+
+  @override
+  State<Login> createState() => _LoginState();
+}
+
+class _LoginState extends State<Login> {
+  // Controller for the username input field
+  final TextEditingController _usernameController = TextEditingController();
+  // Variable to store the selected color
+  String? _selectedColor;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +44,7 @@ class Login extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: _usernameController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -51,11 +62,35 @@ class Login extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _ColorBox(color: Colors.yellow.shade200),
+                  _ColorBox(
+                    color: Colors.yellow.shade200,
+                    isSelected: _selectedColor == "yellow",
+                    onTap: () {
+                      setState(() {
+                        _selectedColor = "yellow";
+                      });
+                    },
+                  ),
                   const SizedBox(width: 20),
-                  _ColorBox(color: Colors.lightBlue.shade200),
+                  _ColorBox(
+                    color: Colors.lightBlue.shade200,
+                    isSelected: _selectedColor == "blue",
+                    onTap: () {
+                      setState(() {
+                        _selectedColor = "blue";
+                      });
+                    },
+                  ),
                   const SizedBox(width: 20),
-                  _ColorBox(color: Colors.pink.shade200),
+                  _ColorBox(
+                    color: Colors.pink.shade200,
+                    isSelected: _selectedColor == "red",
+                    onTap: () {
+                      setState(() {
+                        _selectedColor = "red";
+                      });
+                    },
+                  ),
                 ],
               ),
               const SizedBox(height: 100),
@@ -69,7 +104,9 @@ class Login extends StatelessWidget {
                     side: const BorderSide(color: Colors.lightBlue),
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  // TODO: Implement Navigator
+                },
                 child: const Text(
                   'Ingresar',
                   style: TextStyle(
@@ -89,18 +126,36 @@ class Login extends StatelessWidget {
 
 class _ColorBox extends StatelessWidget {
   final Color color;
+  final bool isSelected;
+  final VoidCallback onTap;
 
-  const _ColorBox({required this.color});
+  const _ColorBox({
+    required this.color,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: color,
-        border: Border.all(color: Colors.black),
-        borderRadius: BorderRadius.circular(4),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: color,
+          border: Border.all(
+            color: !isSelected
+                ? Colors.transparent
+                : color == Colors.yellow.shade200
+                    ? Colors.yellow.shade800
+                    : color == Colors.lightBlue.shade200
+                        ? Colors.lightBlue.shade800
+                        : Colors.pink.shade800,
+            width: isSelected ? 3 : 1,
+          ),
+          borderRadius: BorderRadius.circular(4),
+        ),
       ),
     );
   }

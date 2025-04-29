@@ -1,8 +1,7 @@
-// lib/pages/dashboard_teams.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../services/provider/team_provider.dart'; // ajusta la ruta si es distinta
+import '../services/provider/team_provider.dart';
 
 class DashboardTeams extends StatelessWidget {
   const DashboardTeams({super.key});

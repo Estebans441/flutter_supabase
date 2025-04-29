@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import '../services/provider/team_provider.dart';
 
 class DashboardTeams extends StatelessWidget {
-  const DashboardTeams({super.key});
+  final String? name;
+  const DashboardTeams({super.key, this.name});
 
   static const Map<String, MaterialColor> _teamColors = {
     'Amarillo': Colors.yellow,
@@ -38,7 +39,7 @@ class DashboardTeams extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hola,\n<NOMBRE>!',
+                      'Hola,\n${teamService.currentUser}',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 8),

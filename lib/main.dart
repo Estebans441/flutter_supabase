@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Team Selector',
-          initialRoute: 'dashboard',
+          initialRoute: '/',
           routes: {
             '/': (_) => Login(),
             'dashboard': (_) => DashboardTeams(),

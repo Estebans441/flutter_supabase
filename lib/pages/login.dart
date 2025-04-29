@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_supabase/services/provider/team_provider.dart';
+import 'package:provider/provider.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -105,7 +107,10 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 onPressed: () {
-                  // TODO: Implement Navigator
+                  final teamService =
+                      Provider.of<TeamService>(context, listen: false);
+                  teamService.currentUser = _usernameController.text;
+                  Navigator.pushNamed(context, 'dashboard');
                 },
                 child: const Text(
                   'Ingresar',

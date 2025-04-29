@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -9,24 +11,27 @@ class DashboardTeams extends StatefulWidget {
   final String? name;
   const DashboardTeams({super.key, this.name});
 
-  static const Map<String, MaterialColor> _teamColors = {
-    'Amarillo': Colors.yellow,
-    'Azul': Colors.blue,
-    'Rojo': Colors.red,
-  };
-
-  static const Map<String, List<String>> _members = {
-    'Amarillo': ['Ana', 'Beto', 'Carlos'],
-    'Azul': ['X', 'Y', 'Z'],
-    'Rojo': ['Juan', 'Luisa', 'Mateo'],
-  };
-
   @override
   State<DashboardTeams> createState() => _DashboardTeamsState();
 }
 
 class _DashboardTeamsState extends State<DashboardTeams> {
   late String name;
+  late final StreamSubscription<List<Map<String, dynamic>>> _teamsSub;
+
+  static const Map<String, MaterialColor> _teamColors = {
+    'Amarillo': Colors.yellow,
+    'Azul': Colors.blue,
+    'Rojo': Colors.red,
+  };
+
+  static Map<String, List<String>> members = {
+    'Amarillo': [],
+    'Azul': [],
+    'Rojo': [],
+  };
+
+  /// SUPABASE CLIENT FOR READING DATA IN REAL TIME
   SupabaseClient supabase = Supabase.instance.client;
 
   @override
@@ -34,26 +39,42 @@ class _DashboardTeamsState extends State<DashboardTeams> {
     super.initState();
     final teamService = Provider.of<TeamService>(context, listen: false);
     name = teamService.currentUser!;
+
+    _teamsSub = Supabase.instance.client
+        .from('teams')
+        .stream(primaryKey: ['username']).listen(_onTeamsSnapshot);
+  }
+
+  /// FUNCTION TO UPDATE THE UI
+  void _onTeamsSnapshot(List<Map<String, dynamic>> rows) {
+    final next = {
+      'Amarillo': <String>[],
+      'Azul': <String>[],
+      'Rojo': <String>[],
+    };
+
+    for (final r in rows) {
+      next[r['team']]!.add(r['username'] as String);
+    }
+
+    setState(() {
+      members = next;
+    });
+  }
+
+  @override
+  void dispose() {
+    // Cancel the subscription of the Stream
+    _teamsSub.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     // Get the provider
     final teamService = Provider.of<TeamService>(context);
-
-    final String currentTeam = teamService.currentTeam ?? 'Azul';
-    final MaterialColor teamColor = DashboardTeams._teamColors[currentTeam]!;
-
-    supabase
-        .from('teams')
-        .stream(primaryKey: ['username'])
-        .eq('team', 'blue')
-        .listen((List<Map<String, dynamic>> data) {
-          // Handle the data received from the stream for the blue team
-          for (final item in data) {
-            print('Blue team member: ${item['username']}');
-          }
-        });
+    final currentTeam = teamService.currentTeam ?? 'Azul';
+    final MaterialColor teamColor = _teamColors[currentTeam]!;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -73,7 +94,7 @@ class _DashboardTeamsState extends State<DashboardTeams> {
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
-                      children: DashboardTeams._teamColors.entries.map((e) {
+                      children: _teamColors.entries.map((e) {
                         final color = e.value;
                         return ChoiceChip(
                           label: Text(e.key),
@@ -92,7 +113,7 @@ class _DashboardTeamsState extends State<DashboardTeams> {
                     const SizedBox(height: 16),
                     _TeamBox(
                       title: 'Equipo $currentTeam',
-                      members: DashboardTeams._members[currentTeam] ?? const [],
+                      members: members[currentTeam] ?? const [],
                       color: teamColor,
                     ),
                   ],
@@ -123,7 +144,7 @@ class _DashboardTeamsState extends State<DashboardTeams> {
                         const SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: DashboardTeams._teamColors.entries.map((e) {
+                          children: _teamColors.entries.map((e) {
                             final color = e.value;
                             return GestureDetector(
                               onTap: () {

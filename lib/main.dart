@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_supabase/services/supabase/supabase_config.dart';
 
-void main() {
+Future main() async {
+  await dotenv.load(fileName: '.env');
+  await SupabaseConfig.initializeSupabase();
   runApp(const MyApp());
 }
 

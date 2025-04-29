@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../services/provider/team_provider.dart';
+import '../services/supabase/real-time/real_time_tracking_service.dart';
 
 class DashboardTeams extends StatefulWidget {
   final String? name;
@@ -25,11 +27,11 @@ class DashboardTeams extends StatefulWidget {
 
 class _DashboardTeamsState extends State<DashboardTeams> {
   late String name;
+  SupabaseClient supabase = Supabase.instance.client;
 
   @override
   void initState() {
     super.initState();
-
     final teamService = Provider.of<TeamService>(context, listen: false);
     name = teamService.currentUser!;
   }
@@ -41,6 +43,17 @@ class _DashboardTeamsState extends State<DashboardTeams> {
 
     final String currentTeam = teamService.currentTeam ?? 'Azul';
     final MaterialColor teamColor = DashboardTeams._teamColors[currentTeam]!;
+
+    supabase
+        .from('teams')
+        .stream(primaryKey: ['username'])
+        .eq('team', 'blue')
+        .listen((List<Map<String, dynamic>> data) {
+          // Handle the data received from the stream for the blue team
+          for (final item in data) {
+            print('Blue team member: ${item['username']}');
+          }
+        });
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -113,7 +126,14 @@ class _DashboardTeamsState extends State<DashboardTeams> {
                           children: DashboardTeams._teamColors.entries.map((e) {
                             final color = e.value;
                             return GestureDetector(
-                              onTap: () => teamService.currentTeam = e.key,
+                              onTap: () {
+                                /// UPDATE THE INFO IN THE DATABASE
+                                teamService.currentTeam = e.key;
+                                upsertUser(
+                                  teamService.currentUser!,
+                                  e.key,
+                                );
+                              },
                               child: Container(
                                 width: 32,
                                 height: 32,
@@ -142,8 +162,11 @@ class _DashboardTeamsState extends State<DashboardTeams> {
                       side: BorderSide(color: Colors.red.shade300),
                     ),
                     onPressed: () {
-                      Navigator.pop(context);
+                      /// DELETE THE USER FROM THE DATABASE
+                      deleteUser(teamService.currentUser!);
+
                       teamService.clear();
+                      Navigator.pop(context);
                     },
                     child: const Text('Salir'),
                   ),

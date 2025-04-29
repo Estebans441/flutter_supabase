@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_supabase/services/provider/team_provider.dart';
 import 'package:provider/provider.dart';
 
+import '../services/supabase/real-time/real_time_tracking_service.dart';
+
 class Login extends StatefulWidget {
   const Login({super.key});
 
@@ -66,30 +68,30 @@ class _LoginState extends State<Login> {
                 children: [
                   _ColorBox(
                     color: Colors.yellow.shade200,
-                    isSelected: _selectedColor == "yellow",
+                    isSelected: _selectedColor == "Amarillo",
                     onTap: () {
                       setState(() {
-                        _selectedColor = "yellow";
+                        _selectedColor = "Amarillo";
                       });
                     },
                   ),
                   const SizedBox(width: 20),
                   _ColorBox(
                     color: Colors.lightBlue.shade200,
-                    isSelected: _selectedColor == "blue",
+                    isSelected: _selectedColor == "Azul",
                     onTap: () {
                       setState(() {
-                        _selectedColor = "blue";
+                        _selectedColor = "Azul";
                       });
                     },
                   ),
                   const SizedBox(width: 20),
                   _ColorBox(
                     color: Colors.pink.shade200,
-                    isSelected: _selectedColor == "red",
+                    isSelected: _selectedColor == "Rojo",
                     onTap: () {
                       setState(() {
-                        _selectedColor = "red";
+                        _selectedColor = "Rojo";
                       });
                     },
                   ),
@@ -110,6 +112,11 @@ class _LoginState extends State<Login> {
                   final teamService =
                       Provider.of<TeamService>(context, listen: false);
                   teamService.currentUser = _usernameController.text;
+
+                  // Write the changes on DB
+                  upsertUser(
+                      _usernameController.text, _selectedColor ?? 'blue');
+
                   Navigator.pushNamed(context, 'dashboard');
                 },
                 child: const Text(

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../services/provider/team_provider.dart';
 
-class DashboardTeams extends StatelessWidget {
+class DashboardTeams extends StatefulWidget {
   final String? name;
   const DashboardTeams({super.key, this.name});
 
@@ -20,12 +20,27 @@ class DashboardTeams extends StatelessWidget {
   };
 
   @override
+  State<DashboardTeams> createState() => _DashboardTeamsState();
+}
+
+class _DashboardTeamsState extends State<DashboardTeams> {
+  late String name;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final teamService = Provider.of<TeamService>(context, listen: false);
+    name = teamService.currentUser!;
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Get the provider
     final teamService = Provider.of<TeamService>(context);
 
     final String currentTeam = teamService.currentTeam ?? 'Azul';
-    final MaterialColor teamColor = _teamColors[currentTeam]!;
+    final MaterialColor teamColor = DashboardTeams._teamColors[currentTeam]!;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -39,13 +54,13 @@ class DashboardTeams extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hola,\n${teamService.currentUser}',
+                      'Hola,\n$name',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
-                      children: _teamColors.entries.map((e) {
+                      children: DashboardTeams._teamColors.entries.map((e) {
                         final color = e.value;
                         return ChoiceChip(
                           label: Text(e.key),
@@ -64,7 +79,7 @@ class DashboardTeams extends StatelessWidget {
                     const SizedBox(height: 16),
                     _TeamBox(
                       title: 'Equipo $currentTeam',
-                      members: _members[currentTeam] ?? const [],
+                      members: DashboardTeams._members[currentTeam] ?? const [],
                       color: teamColor,
                     ),
                   ],
@@ -95,7 +110,7 @@ class DashboardTeams extends StatelessWidget {
                         const SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: _teamColors.entries.map((e) {
+                          children: DashboardTeams._teamColors.entries.map((e) {
                             final color = e.value;
                             return GestureDetector(
                               onTap: () => teamService.currentTeam = e.key,
@@ -126,7 +141,10 @@ class DashboardTeams extends StatelessWidget {
                       foregroundColor: Colors.red.shade700,
                       side: BorderSide(color: Colors.red.shade300),
                     ),
-                    onPressed: () => teamService.clear(),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      teamService.clear();
+                    },
                     child: const Text('Salir'),
                   ),
                 ],

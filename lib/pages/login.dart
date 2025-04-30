@@ -109,14 +109,21 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 onPressed: () {
+                  if(
+                      _usernameController.text.isEmpty ||
+                      _selectedColor == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Por favor, completa todos los campos.'),
+                      ),
+                    );
+                    return;
+                  }
                   final teamService =
                       Provider.of<TeamService>(context, listen: false);
                   teamService.currentUser = _usernameController.text;
-
-                  // Write the changes on DB
                   upsertUser(
                       _usernameController.text, _selectedColor ?? 'blue');
-
                   Navigator.pushNamed(context, 'dashboard');
                 },
                 child: const Text(
